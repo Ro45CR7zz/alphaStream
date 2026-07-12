@@ -9,7 +9,8 @@ import {
   Box, 
   Settings, 
   LifeBuoy,
-  LogOut
+  LogOut,
+  BookOpen
 } from "lucide-react";
 
 const mainNav = [
@@ -17,6 +18,7 @@ const mainNav = [
   { name: "Order Flow", href: "/dashboard/flow", icon: Activity },
   { name: "ML Sentiment", href: "/dashboard/sentiment", icon: LineChart },
   { name: "Portfolios", href: "/dashboard/portfolios", icon: Box },
+  { name: "Academy", href: "/dashboard/academy", icon: BookOpen }
 ];
 
 const helpNav = [
