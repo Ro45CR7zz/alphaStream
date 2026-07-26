@@ -17,6 +17,9 @@ transformers
 torch
 huggingface_hub
 safetensors
+peft
+requests
+beautifulsoup4
 
 
 
