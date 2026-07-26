@@ -86,12 +86,6 @@ export default function PortfoliosPage() {
           <p className="mt-1 text-sm text-neutral-500">Track and analyze your active positions.</p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black transition-colors bg-white rounded-lg hover:bg-neutral-200">
-            <Plus className="w-4 h-4" />
-            New Transaction
-          </button>
-        </div>
       </header>
 
       {/* Top Metrics Row */}
@@ -131,9 +125,18 @@ export default function PortfoliosPage() {
                 onChange={(e) => setActiveChartTicker(e.target.value)}
                 className="bg-white/10 text-white text-xs font-bold px-2 py-1 rounded border border-white/10 focus:outline-none"
               >
-                {holdings.length === 0 ? <option value="SPY">SPY</option> : null}
+                {holdings.length === 0 ? (
+                  <option value="SPY" className="bg-[#0a0a0a] text-white">SPY</option> 
+                ) : null}
+                
                 {holdings.map(h => (
-                  <option key={h.ticker} value={h.ticker}>{h.ticker}</option>
+                  <option 
+                    key={h.ticker} 
+                    value={h.ticker} 
+                    className="bg-[#0a0a0a] text-white"
+                  >
+                    {h.ticker}
+                  </option>
                 ))}
               </select>
             </div>
@@ -145,15 +148,6 @@ export default function PortfoliosPage() {
               <CandlestickChart ticker={activeChartTicker} />
           </div>
         </div>
-
-
-        
-
-
-
-
-
-
 
       </motion.div>
 
@@ -238,7 +232,7 @@ export default function PortfoliosPage() {
             </div>
           ) : (
             <div className="flex-1 relative min-h-0 min-w-0">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 300, height: 300 }}>
                 <PieChart>
                   {/* @ts-ignore - Recharts strict typing issue */}
                   <Pie

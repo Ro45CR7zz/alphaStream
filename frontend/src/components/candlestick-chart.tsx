@@ -41,6 +41,9 @@ export function CandlestickChart({ ticker }: { ticker: string }) {
       wickDownColor: '#f87171',
     });
 
+    // Flag to prevent state updates if the component unmounts mid-fetch
+    let isMounted = true;
+
     // 3. Fetch the data from FastAPI
     const fetchData = async () => {
       setIsLoading(true);
@@ -50,7 +53,7 @@ export function CandlestickChart({ ticker }: { ticker: string }) {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        if (res.ok) {
+        if (res.ok && isMounted) {
           const json = await res.json();
           candlestickSeries.setData(json.data);
           chart.timeScale().fitContent(); 
@@ -58,7 +61,9 @@ export function CandlestickChart({ ticker }: { ticker: string }) {
       } catch (error) {
         console.error("Failed to load chart data", error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -72,9 +77,17 @@ export function CandlestickChart({ ticker }: { ticker: string }) {
     };
     window.addEventListener('resize', handleResize);
 
+    // 5. Cleanup
     return () => {
+      isMounted = false; // Prevent async operations from updating an unmounted component
       window.removeEventListener('resize', handleResize);
-      chart.remove();
+      
+      // Wrap the remove call to prevent race conditions during React's Strict Mode rapid unmounting
+      try {
+        chart.remove(); 
+      } catch (error) {
+        console.warn("Chart already disposed");
+      }
     };
   }, [ticker]); 
 

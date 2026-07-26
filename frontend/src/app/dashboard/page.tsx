@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { useMarketStream } from "@/src/hooks/use-market-stream";
 import { SentimentFeed } from "@/src/components/sentiment-feed";
 import { SentimentChart } from "@/src/components/sentiment-chart";
-import { OrderBook3D } from "@/src/components/order-book-3d";
 import { MarketBreadth } from "@/src/components/market-breadth";
+import SectorPerformance from "@/src/components/SectorPerformance";
 
 export default function DashboardPage() {
   // Connect to WS with a mock client ID. In production, this comes from user auth session.
@@ -75,9 +75,9 @@ export default function DashboardPage() {
           <SentimentFeed latestData={streamData} />
         </div>
 
-        {/* Replace the Portfolio Metrics box with this: */}
+        {/* Dynamic Macro Sector Performance Map */}
         <div className="overflow-hidden relative h-64 text-sm border rounded-xl bg-[#0a0a0a] border-white/5">
-          <OrderBook3D />
+          <SectorPerformance />
         </div>
 
         <div className="overflow-hidden h-64 border rounded-xl bg-[#0a0a0a] border-white/5">

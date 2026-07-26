@@ -48,7 +48,7 @@ export function SentimentChart({ latestData }: SentimentChartProps) {
       </div>
       
       <div className="flex-1 w-full h-full min-h-0 min-w-0">
-        <ResponsiveContainer width="100%" height="100%" minHeight={1}>
+        <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 600, height: 300 }}>
           <AreaChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
@@ -71,7 +71,7 @@ export function SentimentChart({ latestData }: SentimentChartProps) {
               fontSize={10} 
               tickLine={false} 
               axisLine={false}
-              domain={[-1, 1]} // Sentiment scores range from -1 to 1
+              domain={[-0.5, 0.5]} // Sentiment scores range from -0.5 to 0.5
               tickFormatter={(val) => val.toFixed(1)}
             />
             <Tooltip 

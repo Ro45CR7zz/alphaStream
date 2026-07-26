@@ -58,16 +58,6 @@ export default function SentimentEnginePage() {
           <p className="mt-1 text-sm text-neutral-500">Query historical NLP analysis and predictive scoring.</p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors border rounded-lg text-neutral-300 border-white/10 bg-white/5 hover:bg-white/10">
-            <Filter className="w-4 h-4" />
-            Filters
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-black transition-colors bg-white rounded-lg hover:bg-neutral-200">
-            <Download className="w-4 h-4" />
-            Export CSV
-          </button>
-        </div>
       </header>
 
       <motion.div 

@@ -1,16 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   LineChart, 
   Activity, 
   Box, 
-  Settings, 
-  LifeBuoy,
   LogOut,
-  BookOpen
 } from "lucide-react";
 
 const mainNav = [
@@ -18,12 +16,6 @@ const mainNav = [
   { name: "Order Flow", href: "/dashboard/flow", icon: Activity },
   { name: "ML Sentiment", href: "/dashboard/sentiment", icon: LineChart },
   { name: "Portfolios", href: "/dashboard/portfolios", icon: Box },
-  { name: "Academy", href: "/dashboard/academy", icon: BookOpen }
-];
-
-const helpNav = [
-  { name: "Support", href: "/support", icon: LifeBuoy },
-  { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -46,8 +38,15 @@ export function Sidebar() {
       {/* Brand Header */}
       <div className="flex items-center h-16 px-6 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-white animate-pulse" />
-          <span className="text-sm font-semibold tracking-widest text-white uppercase">AlphaStream</span>
+          <div className="relative w-8 h-8 overflow-hidden rounded-[10px]">
+            <Image 
+              src="/logo.svg" 
+              alt="AlphaStream Logo" 
+              fill 
+              className="object-contain" 
+            />
+          </div>
+          <span className="text-sm font-semibold tracking-widest text-white">AlphaStream</span>
         </div>
       </div>
 
@@ -78,22 +77,9 @@ export function Sidebar() {
           </div>
         </div>
 
-        {/* Help Center Section */}
+        {/* Sign Out Section (Anchored to bottom using mt-auto) */}
         <div className="px-4 mt-auto mb-4">
-          <p className="px-2 mb-2 text-xs font-medium tracking-wider text-neutral-500 uppercase">Help Center</p>
           <div className="space-y-1">
-            {helpNav.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors rounded-lg text-neutral-400 hover:bg-white/5 hover:text-neutral-200"
-              >
-                <item.icon className="w-4 h-4" />
-                {item.name}
-              </Link>
-            ))}
-            
-            {/* NEW SIGN OUT BUTTON */}
             <button 
               onClick={handleLogout}
               className="flex items-center w-full gap-3 px-3 py-2 text-sm font-medium text-red-400 transition-colors rounded-lg hover:bg-red-400/10 hover:text-red-300"
@@ -101,7 +87,6 @@ export function Sidebar() {
               <LogOut className="w-4 h-4" />
               Sign Out
             </button>
-            
           </div>
         </div>
       </div>

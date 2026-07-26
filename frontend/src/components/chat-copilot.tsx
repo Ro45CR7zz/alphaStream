@@ -94,7 +94,8 @@ export function ChatCopilot() {
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-white/[0.02]">
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
+                  {/* ADDED whitespace-pre-wrap and leading-relaxed HERE */}
+                  <div className={`max-w-[85%] p-3 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed ${
                     msg.role === "user" 
                       ? "bg-white text-black rounded-br-sm" 
                       : "bg-white/10 text-neutral-200 rounded-bl-sm border border-white/5"
