@@ -103,7 +103,6 @@ export default function LoginPage() {
               <input 
                 name="username"
                 type="text" 
-                defaultValue="admin"
                 required
                 className="w-full px-4 py-3 text-sm text-white transition-colors bg-white/5 border rounded-lg border-white/10 focus:outline-none focus:border-white/30 focus:bg-white/10 placeholder:text-neutral-600"
               />
@@ -114,7 +113,6 @@ export default function LoginPage() {
               <input 
                 name="password"
                 type="password" 
-                defaultValue="admin"
                 required
                 className="w-full px-4 py-3 text-sm text-white transition-colors bg-white/5 border rounded-lg border-white/10 focus:outline-none focus:border-white/30 focus:bg-white/10"
               />
