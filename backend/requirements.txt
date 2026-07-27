@@ -13,12 +13,7 @@ python-multipart
 yfinance
 pandas
 numpy
-transformers
-torch
-huggingface_hub
-safetensors
-peft
-requests
+httpx
 beautifulsoup4
 
 
