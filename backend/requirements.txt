@@ -8,7 +8,7 @@ motor
 pymongo
 google-genai
 passlib[bcrypt]
-bcrypt
+bcrypt==3.2.2
 python-jose[cryptography]
 python-multipart
 yfinance
@@ -16,7 +16,6 @@ pandas
 numpy
 httpx
 beautifulsoup4
-
 
 
 # annotated-doc==0.0.4
