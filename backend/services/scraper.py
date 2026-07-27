@@ -9,56 +9,57 @@ HF_MODEL_REPO = "ro45cr7zz/finbert-alpha-stream"
 HF_API_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL_REPO}"
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-def get_sentiment_score(text: str) -> float:
+async def get_sentiment_score(text: str, client: httpx.AsyncClient) -> float:
     """
-    Sends headline text to Hugging Face Serverless Inference API.
+    Sends headline text to Hugging Face Serverless Inference API using a shared async client.
     Calculates compound sentiment score between -1.0 (Negative) and +1.0 (Positive).
     """
     if not HF_TOKEN:
         print("Error: HF_TOKEN is missing from environment variables.")
         return 0.0
 
+    # Ensure auth headers are set specifically for HF, overriding any global client headers if needed
     headers = {"Authorization": f"Bearer {HF_TOKEN}"}
     payload = {"inputs": text}
 
     try:
-        # Synchronous request using httpx for quick single-headline evaluation
-        with httpx.Client(timeout=15.0) as client:
-            response = client.post(HF_API_URL, headers=headers, json=payload)
+        # Re-using the single open connection pool avoids DNS spam and speeds up requests
+        response = await client.post(HF_API_URL, headers=headers, json=payload)
 
-            # Cold-start handling: HF free models take ~15-20s to boot up if idle
-            if response.status_code == 503:
-                print(f"Model '{HF_MODEL_REPO}' is cold-starting on HF servers. Returning Neutral.")
-                return 0.0
+        # Cold-start handling: HF free models take ~15-20s to boot up if idle
+        if response.status_code == 503:
+            print(f"Model '{HF_MODEL_REPO}' is cold-starting on HF servers. Returning Neutral.")
+            return 0.0
 
-            response.raise_for_status()
-            data = response.json()
+        response.raise_for_status()
+        data = response.json()
 
-            # Format usually returns: [[{'label': 'positive', 'score': 0.85}, ...]]
-            predictions = data[0] if isinstance(data[0], list) else data
+        # Format usually returns: [[{'label': 'positive', 'score': 0.85}, ...]]
+        predictions = data[0] if isinstance(data[0], list) else data
 
-            positive_prob = 0.0
-            negative_prob = 0.0
+        positive_prob = 0.0
+        negative_prob = 0.0
 
-            for pred in predictions:
-                label = pred.get("label", "").lower()
-                if label == "positive":
-                    positive_prob = pred.get("score", 0.0)
-                elif label == "negative":
-                    negative_prob = pred.get("score", 0.0)
+        for pred in predictions:
+            label = pred.get("label", "").lower()
+            if label == "positive":
+                positive_prob = pred.get("score", 0.0)
+            elif label == "negative":
+                negative_prob = pred.get("score", 0.0)
 
-            # Compound score calculation
-            compound_score = positive_prob - negative_prob
-            return round(compound_score, 4)
+        # Compound score calculation
+        compound_score = positive_prob - negative_prob
+        return round(compound_score, 4)
 
     except Exception as e:
         print(f"Hugging Face Inference API error for headline '{text}': {e}")
         return 0.0
 
+
 async def fetch_rss(url: str, source_name: str, client: httpx.AsyncClient):
     """Helper function to fetch and parse a single RSS feed."""
     try:
-        response = await client.get(url, timeout=10.0)
+        response = await client.get(url)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "xml")
@@ -79,6 +80,7 @@ async def fetch_rss(url: str, source_name: str, client: httpx.AsyncClient):
         print(f"Error fetching from {source_name}: {e}")
         return []
 
+
 async def scrape_and_analyze_news(tickers: list[str] = None):
     """Fetches news and retrieves sentiment analysis from published FinBERT model."""
     if not tickers:
@@ -97,23 +99,147 @@ async def scrape_and_analyze_news(tickers: list[str] = None):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
 
-    async with httpx.AsyncClient(headers=headers) as client:
+    # Open ONE master connection pool to be used for the entire scraping cycle
+    async with httpx.AsyncClient(headers=headers, timeout=15.0) as client:
         tasks = [fetch_rss(url, source, client) for url, source in endpoints]
         nested_results = await asyncio.gather(*tasks)
 
-    all_news = [news for sublist in nested_results for news in sublist]
+        all_news = [news for sublist in nested_results for news in sublist]
 
-    analyzed_data = []
-    for news in all_news:
-        score = get_sentiment_score(news["raw_headline"])
+        analyzed_data = []
+        for news in all_news:
+            # Pass the single open client to the sentiment evaluation function
+            score = await get_sentiment_score(news["raw_headline"], client)
 
-        analyzed_data.append({
-            "headline": news["headline"],
-            "sentiment_score": score,
-            "published_at": news["published_at"]
-        })
+            analyzed_data.append({
+                "headline": news["headline"],
+                "sentiment_score": score,
+                "published_at": news["published_at"]
+            })
 
     return analyzed_data
+
+
+
+
+#too many tcp connections all at once
+
+# import httpx
+# from bs4 import BeautifulSoup
+# from datetime import datetime, timezone
+# import asyncio
+# import os
+
+# # --- HUGGING FACE INFERENCE API CONFIGURATION ---
+# HF_MODEL_REPO = "ro45cr7zz/finbert-alpha-stream"
+# HF_API_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL_REPO}"
+# HF_TOKEN = os.getenv("HF_TOKEN")
+
+# def get_sentiment_score(text: str) -> float:
+#     """
+#     Sends headline text to Hugging Face Serverless Inference API.
+#     Calculates compound sentiment score between -1.0 (Negative) and +1.0 (Positive).
+#     """
+#     if not HF_TOKEN:
+#         print("Error: HF_TOKEN is missing from environment variables.")
+#         return 0.0
+
+#     headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+#     payload = {"inputs": text}
+
+#     try:
+#         # Synchronous request using httpx for quick single-headline evaluation
+#         with httpx.Client(timeout=15.0) as client:
+#             response = client.post(HF_API_URL, headers=headers, json=payload)
+
+#             # Cold-start handling: HF free models take ~15-20s to boot up if idle
+#             if response.status_code == 503:
+#                 print(f"Model '{HF_MODEL_REPO}' is cold-starting on HF servers. Returning Neutral.")
+#                 return 0.0
+
+#             response.raise_for_status()
+#             data = response.json()
+
+#             # Format usually returns: [[{'label': 'positive', 'score': 0.85}, ...]]
+#             predictions = data[0] if isinstance(data[0], list) else data
+
+#             positive_prob = 0.0
+#             negative_prob = 0.0
+
+#             for pred in predictions:
+#                 label = pred.get("label", "").lower()
+#                 if label == "positive":
+#                     positive_prob = pred.get("score", 0.0)
+#                 elif label == "negative":
+#                     negative_prob = pred.get("score", 0.0)
+
+#             # Compound score calculation
+#             compound_score = positive_prob - negative_prob
+#             return round(compound_score, 4)
+
+#     except Exception as e:
+#         print(f"Hugging Face Inference API error for headline '{text}': {e}")
+#         return 0.0
+
+# async def fetch_rss(url: str, source_name: str, client: httpx.AsyncClient):
+#     """Helper function to fetch and parse a single RSS feed."""
+#     try:
+#         response = await client.get(url, timeout=10.0)
+#         response.raise_for_status()
+
+#         soup = BeautifulSoup(response.text, "xml")
+#         items = soup.find_all("item")
+
+#         results = []
+#         for item in items[:3]:
+#             headline = item.title.text if item.title else ""
+#             pub_date = item.pubDate.text if item.pubDate else datetime.now(timezone.utc).isoformat()
+
+#             results.append({
+#                 "headline": f"[{source_name}] {headline}",
+#                 "raw_headline": headline,
+#                 "published_at": pub_date
+#             })
+#         return results
+#     except Exception as e:
+#         print(f"Error fetching from {source_name}: {e}")
+#         return []
+
+# async def scrape_and_analyze_news(tickers: list[str] = None):
+#     """Fetches news and retrieves sentiment analysis from published FinBERT model."""
+#     if not tickers:
+#         yahoo_query = "SPY,QQQ"
+#         google_query = "SPY stock OR QQQ stock"
+#     else:
+#         yahoo_query = ",".join(tickers)
+#         google_query = " OR ".join([f"{t} stock" for t in tickers])
+
+#     endpoints = [
+#         (f"https://feeds.finance.yahoo.com/rss/2.0/headline?s={yahoo_query}", "Yahoo Finance"),
+#         (f"https://news.google.com/rss/search?q={google_query}&hl=en-US&gl=US&ceid=US:en", "Google News")
+#     ]
+
+#     headers = {
+#         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+#     }
+
+#     async with httpx.AsyncClient(headers=headers) as client:
+#         tasks = [fetch_rss(url, source, client) for url, source in endpoints]
+#         nested_results = await asyncio.gather(*tasks)
+
+#     all_news = [news for sublist in nested_results for news in sublist]
+
+#     analyzed_data = []
+#     for news in all_news:
+#         score = get_sentiment_score(news["raw_headline"])
+
+#         analyzed_data.append({
+#             "headline": news["headline"],
+#             "sentiment_score": score,
+#             "published_at": news["published_at"]
+#         })
+
+#     return analyzed_data
 
 
 
