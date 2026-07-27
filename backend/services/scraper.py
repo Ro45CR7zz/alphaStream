@@ -6,7 +6,7 @@ import os
 
 # --- HUGGING FACE INFERENCE API CONFIGURATION ---
 HF_MODEL_REPO = "ro45cr7zz/finbert-alpha-stream"
-HF_API_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL_REPO}"
+HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{HF_MODEL_REPO}"
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 async def get_sentiment_score(text: str, client: httpx.AsyncClient) -> float:
