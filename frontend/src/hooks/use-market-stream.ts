@@ -23,7 +23,7 @@ export function useMarketStream() {
     if (!token) return;
 
     // 2. Append the token to the URL as a query parameter
-    const ws = new WebSocket(`ws://localhost:8000/api/v1/streams/ws?token=${token}`);
+    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_BASE_URL || "ws://localhost:8000"}/api/v1/streams/ws?token=${token}`);
     wsRef.current = ws;
 
     ws.onopen = () => {

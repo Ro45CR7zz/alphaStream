@@ -17,7 +17,7 @@ export default function SectorPerformance() {
   useEffect(() => {
     async function fetchSectors() {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/market/sectors");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"}/api/v1/market/sectors`);
         if (!res.ok) throw new Error("Failed to fetch live sector benchmarks.");
         const sectorJson = await res.json();
         // Limit to top 6 sectors so it doesn't crowd our h-64 container view

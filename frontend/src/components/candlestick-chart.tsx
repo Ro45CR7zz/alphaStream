@@ -49,7 +49,7 @@ export function CandlestickChart({ ticker }: { ticker: string }) {
       setIsLoading(true);
       try {
         const token = localStorage.getItem("alpha_token");
-        const res = await fetch(`http://localhost:8000/api/v1/market/history/${ticker}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"}/api/v1/market/history/${ticker}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         

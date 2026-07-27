@@ -2,10 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from routers import portfolio, streams, auth_router, sentiment, market, chat
 
 from database import connect_to_mongo, close_mongo_connection, get_database
-from routers import portfolio, streams, auth_router
+from routers import portfolio, streams, auth_router, sentiment, market, chat
 
 # ---------------------------------------------------------
 # Lifespan Events (Startup & Shutdown)
@@ -14,9 +13,6 @@ from routers import portfolio, streams, auth_router
 async def lifespan(app: FastAPI):
     # Startup logic
     await connect_to_mongo()
-    
-    # We removed the global market_data_worker here because 
-    # streams are now initialized per-user upon WebSocket connection!
     
     yield
     # Shutdown logic
@@ -35,7 +31,7 @@ app = FastAPI(
 # ---------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],  # Allows requests from localhost:3000 and Vercel deployments
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

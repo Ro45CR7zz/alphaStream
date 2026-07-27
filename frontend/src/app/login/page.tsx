@@ -21,7 +21,7 @@ export default function LoginPage() {
     
     try {
       // Send credentials to our custom FastAPI endpoint
-      const response = await fetch("http://localhost:8000/api/v1/auth/token", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"}/api/v1/auth/token`, {
         method: "POST",
         body: formData, 
       });
